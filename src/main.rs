@@ -1,5 +1,4 @@
-use std::ptr::null;
-use crate::instructions::Instructions;
+use std::fmt::Debug;
 
 mod virtual_machine;
 mod stack;
@@ -42,23 +41,34 @@ fn main() {
 
     let chars_to_remove = [','];
 
+    // Iterate through each line of the program text.
     for line in program {
+        // Skip empty or whitespace-only lines early to reduce nesting.
+        let trimmed_line = line.trim();
+        if trimmed_line.is_empty() {
+            continue;
+        }
 
-        // Remove the characters you don't want
-        let cleaned_line: String = line.chars()
+        // Clean the line by removing specified unwanted characters and then tokenize it.
+        // Splitting at '@', taking the part before it, trimming, and splitting into words.
+        let tokens: Vec<String> = trimmed_line.chars()
+            // Remove characters specified in `chars_to_remove`.
             .filter(|&c| !chars_to_remove.contains(&c))
+            .collect::<String>()
+            .splitn(2, '@')
+            .next()
+            .unwrap_or("")
+            .trim()
+            // Split the cleaned string into whitespace-separated tokens.
+            .split_ascii_whitespace()
+            .map(ToString::to_string) // Convert each token to a String for consistency.
             .collect();
 
-        // Split at '@' and take the part before it, trimming any trailing whitespace
-        let final_line = cleaned_line.splitn(2, '@').next().unwrap_or("").trim();
-
-        // Check if the final line is not empty before printing
-        if !final_line.is_empty() {
-            println!("{}", final_line);
-        }
+        // At this point, `tokens` contains a vector of the cleaned and tokenized parts of the line before the '@' character.
+        // Further processing can be done on `tokens` as needed.
+        println!("{:#?}", tokens)
     }
 
-    vm.program.push(vec![Instructions::MOV.into()]); // Adds a new Vec<i32> containing 1, 2, 3
-
-
+    //vm.program.push(vec![Instructions::MOV.into()]); // Adds a new Vec<i32> containing 1, 2, 3
+    //vm.program.push(vec![Instructions::MOV.into()]); // Adds a new Vec<i32> containing 1, 2, 3
 }
